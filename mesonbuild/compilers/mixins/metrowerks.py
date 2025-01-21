@@ -1,16 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
 # Copyright 2012-2019 The Meson development team
 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-
-#     http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 from __future__ import annotations
 
 """Representations specific to the Metrowerks/Freescale Embedded C/C++ compiler family."""
@@ -18,7 +8,8 @@ from __future__ import annotations
 import os
 import typing as T
 
-from ...mesonlib import EnvironmentException, OptionKey
+from ...mesonlib import EnvironmentException
+from ...options import OptionKey
 
 if T.TYPE_CHECKING:
     from ...envconfig import MachineInfo
@@ -30,16 +21,7 @@ else:
     # do). This gives up DRYer type checking, with no runtime impact
     Compiler = object
 
-mwcc_buildtype_args = {
-    'plain': [],
-    'debug': ['-g'],
-    'debugoptimized': ['-g', '-O4'],
-    'release': ['-O4,p'],
-    'minsize': ['-Os'],
-    'custom': [],
-}  # type: T.Dict[str, T.List[str]]
-
-mwccarm_instruction_set_args = {
+mwccarm_instruction_set_args: T.Dict[str, T.List[str]] = {
     'generic': ['-proc', 'generic'],
     'v4': ['-proc', 'v4'],
     'v4t': ['-proc', 'v4t'],
@@ -69,9 +51,9 @@ mwccarm_instruction_set_args = {
     'pxa261': ['-proc', 'pxa261'],
     'pxa262': ['-proc', 'pxa262'],
     'pxa263': ['-proc', 'pxa263']
-}  # type: T.Dict[str, T.List[str]]
+}
 
-mwcceppc_instruction_set_args = {
+mwcceppc_instruction_set_args: T.Dict[str, T.List[str]] = {
     'generic': ['-proc', 'generic'],
     '401': ['-proc', '401'],
     '403': ['-proc', '403'],
@@ -97,9 +79,9 @@ mwcceppc_instruction_set_args = {
     '8260': ['-proc', '8260'],
     'e500': ['-proc', 'e500'],
     'gekko': ['-proc', 'gekko'],
-}  # type: T.Dict[str, T.List[str]]
+}
 
-mwasmarm_instruction_set_args = {
+mwasmarm_instruction_set_args: T.Dict[str, T.List[str]] = {
     'arm4': ['-proc', 'arm4'],
     'arm4t': ['-proc', 'arm4t'],
     'arm4xm': ['-proc', 'arm4xm'],
@@ -112,9 +94,9 @@ mwasmarm_instruction_set_args = {
     'arm5TExP': ['-proc', 'arm5TExP'],
     'arm6': ['-proc', 'arm6'],
     'xscale': ['-proc', 'xscale']
-}  # type: T.Dict[str, T.List[str]]
+}
 
-mwasmeppc_instruction_set_args = {
+mwasmeppc_instruction_set_args: T.Dict[str, T.List[str]] = {
     '401': ['-proc', '401'],
     '403': ['-proc', '403'],
     '505': ['-proc', '505'],
@@ -165,22 +147,22 @@ mwasmeppc_instruction_set_args = {
     '5674': ['-proc', '5674'],
     'gekko': ['-proc', 'gekko'],
     'generic': ['-proc', 'generic'],
-}  # type: T.Dict[str, T.List[str]]
+}
 
-mwcc_optimization_args = {
+mwcc_optimization_args: T.Dict[str, T.List[str]] = {
     'plain': [],
     '0': ['-O0'],
     'g': ['-Op'],
     '1': ['-O1'],
     '2': ['-O2'],
-    '3': ['-O3'],
+    '3': ['-O4,p'],
     's': ['-Os']
-}  # type: T.Dict[str, T.List[str]]
+}
 
-mwcc_debug_args = {
+mwcc_debug_args: T.Dict[bool, T.List[str]] = {
     False: [],
     True: ['-g']
-}  # type: T.Dict[bool, T.List[str]]
+}
 
 
 class MetrowerksCompiler(Compiler):
@@ -197,12 +179,12 @@ class MetrowerksCompiler(Compiler):
         self.base_options = {
             OptionKey(o) for o in ['b_pch', 'b_ndebug']}
 
-        default_warn_args = []  # type: T.List[str]
-        self.warn_args = {'0': ['-w', 'off'],
-                          '1': default_warn_args,
-                          '2': default_warn_args + ['-w', 'most'],
-                          '3': default_warn_args + ['-w', 'all'],
-                          'everything': default_warn_args + ['-w', 'full']}  # type: T.Dict[str, T.List[str]]
+        self.warn_args: T.Dict[str, T.List[str]] = {
+            '0': ['-warnings', 'off'],
+            '1': [],
+            '2': ['-warnings', 'on,nocmdline'],
+            '3': ['-warnings', 'on,all'],
+            'everything': ['-warnings', 'on,full']}
 
     def depfile_for_object(self, objfile: str) -> T.Optional[str]:
         # Earlier versions of these compilers do not support specifying
@@ -211,9 +193,6 @@ class MetrowerksCompiler(Compiler):
 
     def get_always_args(self) -> T.List[str]:
         return ['-gccinc']
-
-    def get_buildtype_args(self, buildtype: str) -> T.List[str]:
-        return mwcc_buildtype_args[buildtype]
 
     def get_compiler_check_args(self, mode: CompileCheckMode) -> T.List[str]:
         return []
@@ -248,8 +227,8 @@ class MetrowerksCompiler(Compiler):
     def get_optimization_args(self, optimization_level: str) -> T.List[str]:
         return mwcc_optimization_args[optimization_level]
 
-    def get_output_args(self, target: str) -> T.List[str]:
-        return ['-o', target]
+    def get_output_args(self, outputname: str) -> T.List[str]:
+        return ['-o', outputname]
 
     def get_pic_args(self) -> T.List[str]:
         return ['-pic']
@@ -277,7 +256,7 @@ class MetrowerksCompiler(Compiler):
 
     @classmethod
     def _unix_args_to_native(cls, args: T.List[str], info: MachineInfo) -> T.List[str]:
-        result = []
+        result: T.List[str] = []
         for i in args:
             if i.startswith('-D'):
                 i = '-D' + i[2:]
@@ -295,6 +274,6 @@ class MetrowerksCompiler(Compiler):
     def compute_parameters_with_absolute_paths(self, parameter_list: T.List[str], build_dir: str) -> T.List[str]:
         for idx, i in enumerate(parameter_list):
             if i[:2] == '-I':
-                parameter_list[idx] = i[:9] + os.path.normpath(os.path.join(build_dir, i[9:]))
+                parameter_list[idx] = i[:2] + os.path.normpath(os.path.join(build_dir, i[2:]))
 
         return parameter_list
