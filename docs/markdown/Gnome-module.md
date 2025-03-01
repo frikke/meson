@@ -93,6 +93,7 @@ There are several keyword arguments. Many of these map directly to the
 `g-ir-scanner` tool so see its documentation for more information.
 
 * `dependencies`: deps to use during introspection scanning
+* `doc_format`: (*Added 1.8.0*) format of the inline documentation
 * `extra_args`: command line arguments to pass to gir compiler
 * `env`: (*Added 1.2.0*) environment variables to set, such as
   `{'NAME1': 'value1', 'NAME2': 'value2'}` or `['NAME1=value1', 'NAME2=value2']`,
@@ -203,6 +204,13 @@ Note that if you `#include` the generated header in any of the sources
 for a build target, you must add the generated header to the build
 target's list of sources to codify the dependency. This is true for
 all generated sources, not just `mkenums_simple`.
+
+The generated source file includes all headers passed to the sources keyword
+argument, using paths relative to current build or source directory. That means
+that targets that compile the generated source file must have the current
+directory in its `include_directories`. *Since 1.3.0* `sources` outside of
+current directory do not require adding those directories into
+`include_directories` anymore.
 
 * `body_prefix`: additional prefix at the top of the body file,
   e.g. for extra includes
