@@ -120,7 +120,7 @@ dlang_mod = import('dlang')
 if find_program('dub', required : false).found()
   dlang_mod.generate_dub_file(
     meson.project_name().to_lower(),
-    meson.source_root(),
+    meson.project_source_root(),
     name : meson.project_name(),
     license : meson.project_license(),
     sourceFiles : '{source_file}',
