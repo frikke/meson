@@ -29,7 +29,7 @@ dlang.generate_dub_file(meson.project_name().to_lower(), meson.project_source_ro
                         description: 'Test executable',
                         copyright: 'Copyright © 2018, Meson Team',
                         license: 'MIT',
-                        sourceFiles: 'test.d',
+                        sourceFiles: ['test.d'],
                         targetType: 'executable',
                         dependencies: my_dep
 )

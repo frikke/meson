@@ -122,8 +122,8 @@ if find_program('dub', required : false).found()
     meson.project_name().to_lower(),
     meson.project_source_root(),
     name : meson.project_name(),
-    license : meson.project_license(),
-    sourceFiles : '{source_file}',
+    license : meson.project_license()[0],
+    sourceFiles : ['{source_file}'],
     description : 'Meson sample project.',
     version : '{version}',
   )
